@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  controller:
+    build:
+      context: ./controller
+      dockerfile: Dockerfile
+    container_name: controller
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - EXECUTOR_URL=http://executor:5000
+      - SENTIMENT_MODEL_URL=http://sentiment_model:6000
+      - TS_MODEL_URL=http://ts_model:7000
+      - NODE_ENV=production
+    depends_on:
+      - executor
+      - sentiment_model
+      - ts_model
+    networks:
+      - ai_network
+    volumes:
+      - ./controller:/app
+
+  executor:
+    build:
+      context: ./executor
+      dockerfile: Dockerfile
+    container_name: executor
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "5000:5000"
+    networks:
+      - ai_network
+    volumes:
+      - ./executor:/app
+
+  sentiment_model:
+    build:
+      context: ./sentiment_model
+      dockerfile: Dockerfile
+    container_name: sentiment_model
+    restart: always
+    environment:
+      - MODEL_TYPE=sentiment
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "6000:6000"
+    networks:
+      - ai_network
+    volumes:
+      - ./sentiment_model:/app
+
+  ts_model:
+    build:
+      context: ./ts_model
+      dockerfile: Dockerfile
+    container_name: ts_model
+    restart: always
+    environment:
+      - MODEL_TYPE=timeseries
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "7000:7000"
+    networks:
+      - ai_network
+    volumes:
+      - ./ts_model:/app
+
+networks:
+  ai_network:
+    driver: bridge
