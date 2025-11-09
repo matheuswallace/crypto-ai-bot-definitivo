@@ -1,0 +1,8 @@
+pandas
+numpy
+requests
+flask
+python-binance
+matplotlib
+scikit-learn
+joblib
